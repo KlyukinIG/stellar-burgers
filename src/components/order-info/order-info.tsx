@@ -1,18 +1,28 @@
-import { FC, useMemo } from 'react';
+import { FC, useEffect, useMemo } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
 
 import { Preloader } from '../ui/preloader';
 import { OrderInfoUI } from '../ui/order-info';
 
-import { useSelector } from '../../services/store';
+import { useDispatch, useSelector } from '../../services/store';
 
 import { TIngredient } from '@utils-types';
 
 import { selectIngredients } from '../../services/slices/ingredientsSlice';
-import { selectFeedOrders } from '../../services/slices/feedSlice';
-import { selectProfileOrders } from '../../services/slices/profileOrdersSlice';
+import {
+  fetchOrderByNumber,
+  selectFeedOrders,
+  selectCurrentOrder
+} from '../../services/slices/feedSlice';
+import {
+  fetchProfileOrderByNumber,
+  selectProfileOrders,
+  selectProfileCurrentOrder
+} from '../../services/slices/profileOrdersSlice';
 
 export const OrderInfo: FC = () => {
+  const dispatch = useDispatch();
+
   const { number } = useParams();
   const location = useLocation();
 
@@ -21,11 +31,32 @@ export const OrderInfo: FC = () => {
   const feedOrders = useSelector(selectFeedOrders);
   const profileOrders = useSelector(selectProfileOrders);
 
-  const orders = location.pathname.startsWith('/profile')
-    ? profileOrders
-    : feedOrders;
+  const currentFeedOrder = useSelector(selectCurrentOrder);
+  const currentProfileOrder = useSelector(selectProfileCurrentOrder);
 
-  const orderData = orders.find((order) => order.number === Number(number));
+  const isProfilePage = location.pathname.startsWith('/profile');
+
+  const orders = isProfilePage ? profileOrders : feedOrders;
+
+  const orderFromStore = orders.find(
+    (order) => order.number === Number(number)
+  );
+
+  const orderData = orderFromStore
+    ? orderFromStore
+    : isProfilePage
+      ? currentProfileOrder
+      : currentFeedOrder;
+
+  useEffect(() => {
+    if (orderData || !number) return;
+
+    if (isProfilePage) {
+      dispatch(fetchProfileOrderByNumber(Number(number)));
+    } else {
+      dispatch(fetchOrderByNumber(Number(number)));
+    }
+  }, [dispatch, number, orderData, isProfilePage]);
 
   /* Готовим данные для отображения */
   const orderInfo = useMemo(() => {
