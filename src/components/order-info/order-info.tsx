@@ -1,21 +1,62 @@
-import { FC, useMemo } from 'react';
+import { FC, useEffect, useMemo } from 'react';
+import { useParams, useLocation } from 'react-router-dom';
+
 import { Preloader } from '../ui/preloader';
 import { OrderInfoUI } from '../ui/order-info';
+
+import { useDispatch, useSelector } from '../../services/store';
+
 import { TIngredient } from '@utils-types';
 
-export const OrderInfo: FC = () => {
-  /** TODO: взять переменные orderData и ingredients из стора */
-  const orderData = {
-    createdAt: '',
-    ingredients: [],
-    _id: '',
-    status: '',
-    name: '',
-    updatedAt: 'string',
-    number: 0
-  };
+import { selectIngredients } from '../../services/slices/ingredientsSlice';
+import {
+  fetchOrderByNumber,
+  selectFeedOrders,
+  selectCurrentOrder
+} from '../../services/slices/feedSlice';
+import {
+  fetchProfileOrderByNumber,
+  selectProfileOrders,
+  selectProfileCurrentOrder
+} from '../../services/slices/profileOrdersSlice';
 
-  const ingredients: TIngredient[] = [];
+export const OrderInfo: FC = () => {
+  const dispatch = useDispatch();
+
+  const { number } = useParams();
+  const location = useLocation();
+
+  const ingredients = useSelector(selectIngredients);
+
+  const feedOrders = useSelector(selectFeedOrders);
+  const profileOrders = useSelector(selectProfileOrders);
+
+  const currentFeedOrder = useSelector(selectCurrentOrder);
+  const currentProfileOrder = useSelector(selectProfileCurrentOrder);
+
+  const isProfilePage = location.pathname.startsWith('/profile');
+
+  const orders = isProfilePage ? profileOrders : feedOrders;
+
+  const orderFromStore = orders.find(
+    (order) => order.number === Number(number)
+  );
+
+  const orderData = orderFromStore
+    ? orderFromStore
+    : isProfilePage
+      ? currentProfileOrder
+      : currentFeedOrder;
+
+  useEffect(() => {
+    if (orderData || !number) return;
+
+    if (isProfilePage) {
+      dispatch(fetchProfileOrderByNumber(Number(number)));
+    } else {
+      dispatch(fetchOrderByNumber(Number(number)));
+    }
+  }, [dispatch, number, orderData, isProfilePage]);
 
   /* Готовим данные для отображения */
   const orderInfo = useMemo(() => {
