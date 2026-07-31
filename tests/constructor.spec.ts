@@ -4,34 +4,17 @@ test.describe('Конструктор бургера', () => {
   test.beforeEach(async ({ page }) => {
     await page.routeFromHAR('./tests/hars/ingredients.har', {
       url: '**/api/ingredients',
-      update: false // Используем существующий HAR-файл
+      update: false
     });
 
-    await page.route('**/api/auth/user', async (route) => {
-      await route.fulfill({
-        json: {
-          success: true,
-          user: {
-            email: 'test@test.com',
-            name: 'Test User'
-          }
-        }
-      });
+    await page.routeFromHAR('./tests/hars/orders.har', {
+      url: '**/api/orders',
+      update: false
     });
 
-    await page.route('**/api/orders', async (route) => {
-      if (route.request().method() === 'POST') {
-        await route.fulfill({
-          json: {
-            success: true,
-            order: {
-              number: 12345
-            }
-          }
-        });
-      } else {
-        await route.continue();
-      }
+    await page.routeFromHAR('./tests/hars/auth-user.har', {
+      url: '**/api/auth/user',
+      update: false
     });
 
     await page.context().addCookies([

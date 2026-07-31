@@ -68,6 +68,38 @@ describe('ingredientsSlice', () => {
         data: [mockIngredient],
         loading: false,
         error: null
+      },
+      burgerConstructor: {
+        bun: null,
+        ingredients: []
+      },
+      order: {
+        orderRequest: false,
+        orderModalData: null,
+        error: null
+      },
+      user: {
+        user: null,
+        isAuthChecked: true,
+        isAuthenticated: false,
+        loading: false,
+        error: null
+      },
+      feed: {
+        orders: [],
+        total: 0,
+        totalToday: 0,
+        loading: false,
+        error: null,
+        currentOrder: null,
+        currentOrderLoading: false
+      },
+      profileOrders: {
+        orders: [],
+        loading: false,
+        error: null,
+        currentOrder: null,
+        currentOrderLoading: false
       }
     };
     expect(selectIngredients(state)).toEqual([mockIngredient]);
@@ -77,8 +109,40 @@ describe('ingredientsSlice', () => {
     const state = {
       ingredients: {
         data: [mockIngredient],
+        loading: true,
+        error: null
+      },
+      burgerConstructor: {
+        bun: null,
+        ingredients: []
+      },
+      order: {
+        orderRequest: false,
+        orderModalData: null,
+        error: null
+      },
+      user: {
+        user: null,
+        isAuthChecked: true,
+        isAuthenticated: false,
         loading: false,
         error: null
+      },
+      feed: {
+        orders: [],
+        total: 0,
+        totalToday: 0,
+        loading: false,
+        error: null,
+        currentOrder: null,
+        currentOrderLoading: false
+      },
+      profileOrders: {
+        orders: [],
+        loading: false,
+        error: null,
+        currentOrder: null,
+        currentOrderLoading: false
       }
     };
     const selector = selectIngredientById(mockIngredient._id);
